@@ -1,0 +1,63 @@
+<template id="template">
+
+  <style type="text/css">
+    ::content h1 {color:red};
+  </style>
+
+  <fieldset>
+    <legend>
+      <content select="h1"></content>
+    </legend>
+    <h1>shadow dom</h1>
+    <content select="p"></content>
+
+    <textarea style="width:400px; height:200px"></textarea>
+
+    <input type="submit" value="Submit Comment">
+
+    <content select=".footer"></content>
+
+    
+    <!-- <content></content> This will get all elements that haven't been matched from our custom element above and place it here -->
+
+  </fieldset>
+</template>
+
+<script type="text/javascript">
+(function(){ // javascript not encapsulated so vars will be on window so wrap in iife or use module
+
+   // 1. create the prototype for the custom element
+  var CommentProto = Object.create(HTMLElement.prototype);
+  
+  /* Can add properties and/or methods here to the CommentProto */
+  
+  CommentProto.foo = function(){}
+  
+  // This is needed as document.querySelector would traverse elements in the page that this component is imported to
+  // so it would try find an element in the index.html file instead of here
+  var importDoc = document.currentScript.ownerDocument;
+
+
+  CommentProto.createdCallback = function() {
+    var template = importDoc.querySelector('#template');
+    
+    // make the custom element the shadow host by giving it a shadow root.
+    var shadowHost = this.createShadowRoot(); 
+    shadowHost.appendChild(document.importNode(template.content, true)); // import the template with the into the shadow host
+
+    console.log("shadow dom: h1 cannot be found from travarsing shadow dom: " + shadowHost.querySelector("h1"));
+    console.log(shadowHost.querySelector("legend"));
+
+  };
+  
+
+  // 2. Register the element
+  document.registerElement('comment-form', {
+    prototype: CommentProto
+  });
+
+})();
+ 
+</script>
+
+<!-- http://plnkr.co/edit/JYdX0NQFqgA1WWlAhU9L?p=preview -->
